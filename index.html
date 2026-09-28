@@ -205,6 +205,12 @@ th{background:var(--chip);font-weight:500}
 .ex-foot{margin-top:28px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px solid var(--line);padding-top:18px}
 .ex-msg{color:var(--red);font-size:15px}
 .hide-right .q.is-right{display:none}
+.psw-bar{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:860px;margin:0 auto 18px}
+.psw{border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left;display:grid;gap:0}
+.psw b{font-family:var(--f-disp);font-size:19px}
+.psw span{font-size:13px;color:var(--muted)}
+.psw[aria-selected="true"]{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.psw[aria-selected="true"] span{color:var(--bg);opacity:.8}
 .result{font-family:var(--f-disp);font-size:18px}
 @media (prefers-reduced-motion:no-preference){.mark-r{animation:stamp .25s ease-out}@keyframes stamp{from{transform:scale(1.8) rotate(-10deg);opacity:0}}}
 </style>
@@ -216,11 +222,11 @@ th{background:var(--chip);font-weight:500}
   <header class="top">
     <div class="eyebrow">國一地理 · 第 1–2 章 · 家庭學習包</div>
     <h1>世界眼中的臺灣<span class="dot">。</span></h1>
-    <p>先讀講義，再到互動練習動手玩，最後寫一張試卷檢查自己。每個單元都對應均一教育平台的影片，看完影片再回來複習效果最好。</p>
+    <p>先讀講義，再到互動練習動手玩，最後寫試卷檢查自己（第一、二部分各一份）。每個單元都對應均一教育平台的影片，看完影片再回來複習效果最好。</p>
     <nav class="tabs" role="tablist" aria-label="學習區">
       <button class="tab" role="tab" id="t-notes" aria-controls="notes" aria-selected="true" data-tab="notes">講義<small>8 個單元</small></button>
       <button class="tab" role="tab" id="t-lab" aria-controls="lab" aria-selected="false" data-tab="lab">互動練習<small>6 個小工具</small></button>
-      <button class="tab" role="tab" id="t-exam" aria-controls="exam" aria-selected="false" data-tab="exam">試卷<small>28 題 · 100 分</small></button>
+      <button class="tab" role="tab" id="t-exam" aria-controls="exam" aria-selected="false" data-tab="exam">試卷<small>兩份 · 各 100 分</small></button>
     </nav>
   </header>
 
@@ -600,25 +606,11 @@ th{background:var(--chip);font-weight:500}
 
   <!-- ============ 試卷 ============ -->
   <section class="panel" id="exam" role="tabpanel" aria-labelledby="t-exam" hidden>
-    <form class="paper" id="paper" novalidate>
-      <div class="score" id="score" hidden></div>
-      <div class="ex-head">
-        <h2>國一地理　世界眼中的臺灣　單元測驗</h2>
-        <div class="sub">範圍：經緯度座標、時區、海陸分布、臺灣的位置與範圍　·　作答時間 40 分鐘</div>
-        <div class="ex-meta">
-          <label for="ex-name">姓名<input id="ex-name" type="text" autocomplete="off"></label>
-          <label for="ex-date">日期<input id="ex-date" type="text" autocomplete="off"></label>
-          <span>滿分 100 分</span>
-        </div>
-      </div>
-      <div id="sections"></div>
-      <div class="ex-foot">
-        <button type="submit" class="btn" id="ex-submit">交卷</button>
-        <button type="button" class="btn ghost" id="ex-retry" hidden>重新作答</button>
-        <label id="ex-only-wrap" hidden style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="ex-only">只看錯題</label>
-        <span class="ex-msg" id="ex-msg" role="status"></span>
-      </div>
-    </form>
+    <div class="psw-bar" role="tablist" aria-label="選擇試卷">
+      <button type="button" class="psw" role="tab" data-paper="p1" aria-selected="true"><b>第一部分</b><span>全球經緯度座標系統 · 單元 1–5</span></button>
+      <button type="button" class="psw" role="tab" data-paper="p2" aria-selected="false"><b>第二部分</b><span>臺灣在哪裡 · 單元 6–8</span></button>
+    </div>
+    <div id="papers"></div>
   </section>
 </div>
 
@@ -911,106 +903,180 @@ const gridFig=`<svg viewBox="0 0 340 210" role="img" aria-label="經緯度座標
 ${[["A",30,60],["B",-30,-60],["C",30,-60],["D",-30,60]].map(([n,la,lo])=>{const x=180+lo*140/180,y=95-la*85/90;return `<circle cx="${x}" cy="${y}" r="5" class="s-red"/><text x="${x+8}" y="${y-6}" class="s-txt" style="font-weight:700;font-size:14px">${n}</text>`}).join("")}
 </svg>`;
 
-const SECTIONS=[
+const EXAMS=[
+{id:"p1",short:"第一部分試卷",title:"第一部分　全球經緯度座標系統",range:"範圍：講義單元 1–5（位置表達、地圖與比例尺、經緯度、時區、緯度與氣候）",sections:[
  {title:"一、基礎題",note:"單選題，每題 3 分，共 36 分",pts:3,qs:[
   {s:"小明說：「我家在便利商店的北邊。」這是用哪一種方式表示位置？",o:["絕對位置","相對位置","經緯度座標","行政區"],a:1,e:"有一個參考點（便利商店），再說出方向，這是相對位置。"},
+  {s:"下列哪一個是用「絕對位置」表示？",o:["學校在公園的東邊","臺北 101 在我家的東南方","北緯 25°、東經 121.5°","超商在郵局旁邊"],a:2,e:"經緯度是固定的座標系統，不管誰來說都一樣，屬於絕對位置。其他選項都需要參考點，是相對位置。"},
   {s:"一張地圖上沒有畫方向標，一般要怎麼判斷方向？",o:["上南、下北、左東、右西","上北、下南、左西、右東","上東、下西、左北、右南","沒有方向標就無法判斷"],a:1,e:"沒有方向標時，地圖習慣是「上北下南、左西右東」。"},
+  {s:"地圖上用來說明各種符號代表什麼意思的是哪一個要素？",o:["圖名","圖例","方向標","比例尺"],a:1,e:"圖例說明符號的意思；圖名說明地圖在畫什麼；方向標指出北方；比例尺說明縮小多少。"},
   {s:"經度 0° 的經線叫做什麼？",o:["赤道","北回歸線","本初子午線","國際換日線"],a:2,e:"0° 經線是本初子午線，通過英國倫敦的格林威治天文臺。赤道是 0° 緯線。"},
+  {s:"經線可以指示哪一個方向？",o:["東西","南北","東北、西南","所有方向"],a:1,e:"經線連接南北極，所以指示南北方向。緯線繞地球一圈，指示東西方向。"},
   {s:"下列關於緯線的說明，哪一個正確？",o:["緯線是連接南北極的半圓","每一條緯線都一樣長","赤道是最長的緯線","緯度最大可以到 180°"],a:2,e:"緯線是圓圈，赤道最長、越往兩極越短，緯度最大 90°。連接南北極、一樣長的是經線。"},
   {s:"地球自轉一圈 360° 需要 24 小時，每 1 小時會轉過多少經度？",o:["10°","15°","20°","30°"],a:1,e:"360° ÷ 24 = 15°，所以每 15 個經度相差 1 小時。"},
+  {s:"全世界一共劃分成多少個時區？",o:["12 個","24 個","36 個","360 個"],a:1,e:"一天 24 小時，每 15 個經度一個時區，360 ÷ 15 = 24 個。"},
   {s:"臺灣使用的標準時間是哪一個時區？",o:["UTC+0","UTC+8","UTC+9","UTC−8"],a:1,e:"臺灣以東經 120° 為標準經線，120 ÷ 15 = 8，所以是 UTC+8。"},
-  {s:"地球表面的海洋大約占多少？",o:["29%","50%","71%","90%"],a:2,e:"海洋約 71%、陸地約 29%，所以地球被稱為藍色星球。"},
-  {s:"世界上面積最大的大洋是哪一個？",o:["大西洋","印度洋","北極海","太平洋"],a:3,e:"太平洋最大，約占全球海洋面積的一半。"},
-  {s:"世界上面積最大的洲是哪一個？",o:["非洲","亞洲","北美洲","南極洲"],a:1,e:"七大洲由大到小：亞、非、北美、南美、南極、歐、大洋。"},
-  {s:"關於臺灣的相對位置，哪一個說法正確？",o:["亞洲大陸的東側、太平洋的西側","亞洲大陸的西側、太平洋的東側","亞洲大陸的東側、印度洋的西側","歐洲大陸的東側、大西洋的西側"],a:0,e:"臺灣在亞洲大陸東南邊緣、太平洋西側。兩個方向相反，要小心。"},
-  {s:"有一條重要的緯線通過臺灣本島的嘉義和花蓮，它是哪一條？",o:["赤道","北回歸線","南回歸線","北極圈"],a:1,e:"北回歸線（約北緯 23.5°）通過嘉義、花蓮。"},
-  {s:"我國的領海範圍，是從基線往外多少距離？",o:["3 浬","12 浬","24 浬","200 浬"],a:1,e:"領海 12 浬、鄰接區 24 浬、專屬經濟海域 200 浬，都從基線量起。"}
+  {s:"五帶之中，位在南、北回歸線之間的是哪一帶？",o:["熱帶","北溫帶","南溫帶","寒帶"],a:0,e:"兩條回歸線（23.5°）之間是熱帶；回歸線到極圈是溫帶；極圈以內是寒帶。"},
+  {s:"有一條重要的緯線通過臺灣本島的嘉義和花蓮，它是哪一條？",o:["赤道","北回歸線","南回歸線","北極圈"],a:1,e:"北回歸線（約北緯 23.5°）通過嘉義、花蓮。"}
  ]},
  {title:"二、進階題",note:"單選題，需要計算或看圖，每題 4 分，共 40 分",pts:4,qs:[
+  {s:"小華面向東方站著，他的右手邊是哪一個方位？",o:["北","南","西","東北"],a:1,e:"面向東方時，左手邊是北、右手邊是南、背後是西。可以在紙上畫八方位試試看。"},
   {s:"在比例尺 1:50,000 的地圖上，量得兩地相距 4 公分，實際距離是多少？",o:["200 公尺","2 公里","20 公里","200 公里"],a:1,e:"4 × 50,000 = 200,000 公分 = 2,000 公尺 = 2 公里。"},
+  {s:"兩地實際相距 3 公里，畫在比例尺 1:100,000 的地圖上，應該畫多長？",o:["0.3 公分","3 公分","30 公分","300 公分"],a:1,e:"3 公里 = 300,000 公分，300,000 ÷ 100,000 = 3 公分。"},
   {s:"比較比例尺 1:5,000 和 1:250,000 的兩張地圖（紙張一樣大），哪一個說法正確？",o:["1:5,000 是大比例尺，畫的範圍較小、內容較詳細","1:5,000 是小比例尺，畫的範圍較大","1:250,000 內容比較詳細","兩張地圖畫的範圍一樣大"],a:0,e:"分母小的是大比例尺：範圍小、內容詳細。分母大的是小比例尺：範圍大、內容簡略。"},
+  {s:"請看下圖。哪一個點位於「南緯 30°、西經 60°」？",fig:gridFig,o:["A","B","C","D"],a:1,e:"南緯在赤道（藍線）下方，西經在本初子午線（紅線）左邊，所以是左下的 B 點。"},
   {s:"英國倫敦（UTC+0）是 1 月 1 日上午 10:00，這時臺灣（UTC+8）是幾點？",o:["1 月 1 日 上午 2:00","1 月 1 日 下午 6:00","1 月 2 日 上午 2:00","1 月 1 日 晚上 10:00"],a:1,e:"臺灣在東邊，要加 8 小時：10 + 8 = 18，也就是下午 6:00，同一天。"},
   {s:"臺灣（UTC+8）是 10 月 10 日上午 9:00，美國紐約（UTC−5）是幾月幾日幾點？",o:["10 月 10 日 晚上 10:00","10 月 10 日 凌晨 4:00","10 月 9 日 晚上 8:00","10 月 11 日 上午 8:00"],a:2,e:"兩地差 8 − (−5) = 13 小時，紐約在西邊要減：9 − 13 = −4，退回前一天，24 − 4 = 20，所以是 10 月 9 日晚上 8:00。"},
   {s:"甲地位於東經 30°，乙地位於東經 90°。如果兩地都依照經度計算時間，甲地中午 12:00 時，乙地是幾點？",o:["上午 8:00","中午 12:00","下午 4:00","晚上 6:00"],a:2,e:"兩地差 90 − 30 = 60°，60 ÷ 15 = 4 小時。乙地在東邊，要加 4 小時，是下午 4:00。"},
-  {s:"請看下圖。哪一個點位於「南緯 30°、西經 60°」？",fig:gridFig,o:["A","B","C","D"],a:1,e:"南緯在赤道（藍線）下方，西經在本初子午線（紅線）左邊，所以是左下的 B 點。"},
   {s:"新加坡（約北緯 1°）比臺北（約北緯 25°）全年都熱，主要原因是什麼？",o:["新加坡的經度比較大","新加坡緯度比較低，太陽照射的角度比較大","新加坡人口比較多","新加坡的時區比較早"],a:1,e:"緯度越低，陽光越接近直射，熱量越集中，所以越熱。經度和時區跟冷熱無關。"},
-  {s:"某地位於北緯 70°，它屬於哪一個溫度帶？",o:["熱帶","北溫帶","北寒帶","南寒帶"],a:2,e:"北極圈是北緯 66.5°，70° 在北極圈以內，屬於北寒帶。"},
-  {s:"臺灣本島最南端的地點是哪裡？",o:["富貴角","三貂角","鵝鑾鼻","國聖港燈塔"],a:2,e:"本島四極：北富貴角、南鵝鑾鼻、東三貂角、西國聖港燈塔。"},
-  {s:"在我國的專屬經濟海域裡，我國擁有什麼權利？",o:["完整的主權，外國船隻完全不能通過","開發海洋資源的權利，例如捕魚和開採天然氣","只能給軍隊使用","沒有任何權利"],a:1,e:"經濟海域可以開發海洋資源，但外國船隻可以通過。擁有完整主權的是 12 浬的領海。"}
+  {s:"某地位於北緯 70°，它屬於哪一個溫度帶？",o:["熱帶","北溫帶","北寒帶","南寒帶"],a:2,e:"北極圈是北緯 66.5°，70° 在北極圈以內，屬於北寒帶。"}
+ ]},
+ {title:"三、挑戰題組",note:"閱讀情境後作答，每題 4 分，共 24 分",pts:4,qs:[
+  {story:"<b>題組一</b>　小美在地圖上找到兩個地方：甲地位在北緯 40°、東經 120°，乙地位在北緯 40°、西經 60°。（兩地都依照經度計算時間）",s:"甲、乙兩地的經度相差多少度？",o:["60°","120°","180°","240°"],a:2,e:"一個在東經、一個在西經，中間隔著本初子午線，要相加：120 + 60 = 180°。"},
+  {s:"甲地是下午 3:00 時，乙地是幾點？",o:["當天凌晨 3:00","隔天凌晨 3:00","當天下午 3:00","前一天晚上 9:00"],a:0,e:"相差 180° ÷ 15 = 12 小時。乙地在西邊要減：15 − 12 = 3，是當天凌晨 3:00。"},
+  {s:"甲、乙兩地都位在哪一個溫度帶？",o:["熱帶","北溫帶","北寒帶","南溫帶"],a:1,e:"兩地都在北緯 40°，介於北回歸線（23.5°）和北極圈（66.5°）之間，屬於北溫帶。溫度帶看緯度，和經度無關。"},
+  {story:"<b>題組二</b>　小安想看世界盃足球賽直播。比賽在法國巴黎（UTC+1）當地時間晚上 9:00 開始。（不考慮夏令時間）",s:"比賽開始時，臺灣（UTC+8）是幾點？",o:["當天下午 2:00","當天晚上 11:00","隔天凌晨 4:00","隔天早上 8:00"],a:2,e:"兩地差 8 − 1 = 7 小時，臺灣在東邊要加：21 + 7 = 28，超過 24 要進到隔天，28 − 24 = 4，所以是隔天凌晨 4:00。"},
+  {s:"巴黎的時間比臺灣晚，主要原因是什麼？",o:["巴黎位在臺灣的西邊，比較晚看到太陽","巴黎的緯度比較高","巴黎的面積比較大","巴黎靠近大西洋"],a:0,e:"地球由西向東轉，東邊先看到太陽，時間比較早。巴黎在臺灣西邊，所以時間比較晚。"},
+  {story:"<b>題組三</b>　小明拿手電筒照在方格紙上。直直往下照時，光圈小、很亮；斜斜地照時，光圈變大、比較暗。",s:"這個實驗可以用來說明什麼？",o:["高緯度地區陽光斜射，熱量分散，所以比較冷","經度越大的地方越熱","地球上有 24 個時區","地圖要有比例尺"],a:0,e:"斜射時同樣的光分散到比較大的面積，每一塊得到的熱量比較少。高緯度地區陽光斜射，所以比較冷。"}
+ ]}
+]},
+{id:"p2",short:"第二部分試卷",title:"第二部分　臺灣在哪裡",range:"範圍：講義單元 6–8（海陸分布與臺灣位置、臺灣的範圍與行政區、位置對臺灣的影響）",sections:[
+ {title:"一、基礎題",note:"單選題，每題 3 分，共 36 分",pts:3,qs:[
+  {s:"地球表面的海洋大約占多少？",o:["29%","50%","71%","90%"],a:2,e:"海洋約 71%、陸地約 29%，所以地球被稱為藍色星球。"},
+  {s:"世界上面積最大的大洋是哪一個？",o:["大西洋","印度洋","北極海","太平洋"],a:3,e:"太平洋最大，約占全球海洋面積的一半。"},
+  {s:"世界上面積最大的洲是哪一個？",o:["非洲","亞洲","北美洲","南極洲"],a:1,e:"七大洲由大到小：亞、非、北美、南美、南極、歐、大洋。"},
+  {s:"七大洲之中，面積最小的是哪一洲？",o:["歐洲","南極洲","大洋洲","南美洲"],a:2,e:"大洋洲面積最小，排在歐洲後面。"},
+  {s:"比較北半球和南半球，哪一個說法正確？",o:["北半球陸地比較多","南半球陸地比較多","兩個半球的陸地一樣多","北半球沒有海洋"],a:0,e:"北半球陸地比較多，南半球海洋比較多。"},
+  {s:"關於臺灣的相對位置，哪一個說法正確？",o:["亞洲大陸的東側、太平洋的西側","亞洲大陸的西側、太平洋的東側","亞洲大陸的東側、印度洋的西側","歐洲大陸的東側、大西洋的西側"],a:0,e:"臺灣在亞洲大陸東南邊緣、太平洋西側。兩個方向相反，要小心。"},
+  {s:"臺灣和中國大陸之間，隔著哪一個海峽？",o:["臺灣海峽","巴士海峽","麻六甲海峽","白令海峽"],a:0,e:"臺灣西邊隔著臺灣海峽和中國大陸相望。"},
+  {s:"臺灣的南邊隔著巴士海峽，和哪一個國家相鄰？",o:["日本","韓國","菲律賓","越南"],a:2,e:"巴士海峽在臺灣和菲律賓之間。"},
+  {s:"臺灣本島大約位在哪個經緯度範圍？",o:["東經 100°–102°、北緯 22°–25°","東經 120°–122°、北緯 22°–25°","西經 120°–122°、北緯 22°–25°","東經 120°–122°、南緯 22°–25°"],a:1,e:"臺灣本島約在東經 120°–122°、北緯 22°–25°。臺灣在東半球、北半球，所以是東經、北緯。"},
+  {s:"臺灣本島最北端的地點是哪裡？",o:["富貴角","鵝鑾鼻","三貂角","國聖港燈塔"],a:0,e:"本島四極：北富貴角、南鵝鑾鼻、東三貂角、西國聖港燈塔。"},
+  {s:"我國目前有幾個直轄市？",o:["3 個","5 個","6 個","13 個"],a:2,e:"6 個直轄市：臺北市、新北市、桃園市、臺中市、臺南市、高雄市。"},
+  {s:"我國的領海範圍，是從基線往外多少距離？",o:["3 浬","12 浬","24 浬","200 浬"],a:1,e:"領海 12 浬、鄰接區 24 浬、專屬經濟海域 200 浬，都從基線量起。"}
+ ]},
+ {title:"二、進階題",note:"單選題，需要判斷或計算，每題 4 分，共 40 分",pts:4,qs:[
+  {s:"七大洲面積的排序，哪一個正確？",o:["亞洲 ＞ 非洲 ＞ 北美洲","非洲 ＞ 亞洲 ＞ 北美洲","亞洲 ＞ 北美洲 ＞ 非洲","歐洲 ＞ 亞洲 ＞ 非洲"],a:0,e:"由大到小是亞洲、非洲、北美洲、南美洲、南極洲、歐洲、大洋洲。口訣：亞非北南南歐大。"},
+  {s:"太平洋大約占全球海洋面積的多少？",o:["十分之一","四分之一","一半","四分之三"],a:2,e:"太平洋是最大的大洋，約占全球海洋的一半，比所有陸地加起來還大。"},
+  {s:"臺灣本島最南端的地點是哪裡？",o:["富貴角","三貂角","鵝鑾鼻","國聖港燈塔"],a:2,e:"本島最南端是屏東縣的鵝鑾鼻。"},
+  {s:"臺灣本島的四個極點中，哪兩個都位在新北市？",o:["富貴角和三貂角","鵝鑾鼻和富貴角","三貂角和國聖港燈塔","鵝鑾鼻和國聖港燈塔"],a:0,e:"最北的富貴角和最東的三貂角都在新北市；鵝鑾鼻在屏東縣；國聖港燈塔在臺南市。"},
+  {s:"「連江縣」指的是哪裡？",o:["金門","馬祖","澎湖","蘭嶼"],a:1,e:"連江縣就是馬祖。金門是金門縣，澎湖是澎湖縣，蘭嶼屬於臺東縣。"},
+  {s:"下列行政區的配對，哪一個正確？",o:["新竹市——直轄市","桃園市——直轄市","基隆市——縣","嘉義縣——直轄市"],a:1,e:"桃園市是直轄市。新竹市、基隆市是「市」（不是直轄市），嘉義縣是「縣」。"},
+  {s:"1 浬大約是 1.852 公里。我國領海 12 浬，大約是多少公里？",o:["約 12 公里","約 22 公里","約 44 公里","約 370 公里"],a:1,e:"12 × 1.852 ≈ 22.2 公里。24 浬約 44 公里，200 浬約 370 公里。"},
+  {s:"關於鄰接區的範圍，哪一個說法正確？",o:["從基線往外量到 24 浬","從領海的外緣再往外量 24 浬","從海岸往外量 12 浬","從公海往內量 24 浬"],a:0,e:"領海、鄰接區、經濟海域都是從基線量起。鄰接區到 24 浬，所以實際上是領海外面再多 12 浬。"},
+  {s:"在我國的專屬經濟海域裡，我國擁有什麼權利？",o:["完整的主權，外國船隻完全不能通過","開發海洋資源的權利，例如捕魚和開採天然氣","只能給軍隊使用","沒有任何權利"],a:1,e:"經濟海域可以開發海洋資源，但外國船隻可以通過。擁有完整主權的是 12 浬的領海。"},
+  {s:"臺灣常常發生地震，和臺灣的哪一個位置特性最有關係？",o:["位在北回歸線上","位在板塊交界處","位在太平洋西側的航線上","位在候鳥遷徙路線上"],a:1,e:"臺灣位在歐亞板塊和菲律賓海板塊的交界處，板塊互相擠壓，所以地震多、山也很高。"}
  ]},
  {title:"三、挑戰題組",note:"閱讀情境後作答，每題 4 分，共 24 分",pts:4,qs:[
   {story:"<b>題組一</b>　每年 10 月前後，黑面琵鷺會從朝鮮半島西岸一帶，飛到臺南七股的溼地過冬，到了隔年 3、4 月再飛回北方繁殖。",s:"黑面琵鷺選擇在臺灣過冬，和臺灣的哪一個位置特性最有關係？",o:["位在東西向國際航線的中間","位在東亞南北遷徙路線的中途，冬天比北方溫暖","位在兩個板塊的交界處","位在南半球"],a:1,e:"臺灣位在東亞南北向的候鳥遷徙路線上，冬天比朝鮮半島溫暖，成為候鳥的中繼站和度冬地。"},
   {s:"朝鮮半島位在臺灣的哪一個方位？",o:["東南方","西南方","東北方","西北方"],a:2,e:"朝鮮半島（約北緯 35°–38°、東經 126°–129°）比臺灣更北、也更東，所以在東北方。"},
-  {story:"<b>題組二</b>　小安想看世界盃足球賽直播。比賽在法國巴黎（UTC+1）當地時間晚上 9:00 開始。（不考慮夏令時間）",s:"比賽開始時，臺灣（UTC+8）是幾點？",o:["當天下午 2:00","當天晚上 11:00","隔天凌晨 4:00","隔天早上 8:00"],a:2,e:"兩地差 8 − 1 = 7 小時，臺灣在東邊要加：21 + 7 = 28，超過 24 要進到隔天，28 − 24 = 4，所以是隔天凌晨 4:00。"},
-  {s:"巴黎的時間比臺灣晚，主要原因是什麼？",o:["巴黎位在臺灣的西邊，比較晚看到太陽","巴黎的緯度比較高","巴黎的面積比較大","巴黎靠近大西洋"],a:0,e:"地球由西向東轉，東邊先看到太陽，時間比較早。巴黎在臺灣西邊，所以時間比較晚。"},
+  {story:"<b>題組二</b>　海巡署發現一艘外國漁船，在距離臺灣基線約 100 浬的海上捕魚，事先沒有取得我國同意。",s:"這艘漁船位在我國的哪一個海域範圍？",o:["領海","鄰接區","專屬經濟海域","公海"],a:2,e:"100 浬超過 24 浬（鄰接區），但還在 200 浬以內，屬於專屬經濟海域。"},
+  {s:"這艘漁船的行為合理嗎？",o:["不合理，因為我國在經濟海域擁有捕魚等海洋資源的權利","合理，因為不在領海內，任何人都可以捕魚","不合理，因為外國船隻完全不能通過這裡","合理，因為那裡是公海"],a:0,e:"外國船隻可以通過經濟海域，但沒有經過同意，不能在裡面捕魚或開採資源。"},
   {story:"<b>題組三</b>　冰河時期，全球海平面比現在低了一百多公尺，臺灣海峽大部分露出水面成為陸地。後來氣候變暖，海平面上升，臺灣再度成為島嶼。",s:"冰河時期臺灣海峽變成陸地，對臺灣的生物帶來什麼影響？",o:["亞洲大陸的動植物可以走到臺灣","臺灣變成熱帶沙漠","臺灣的動物全部滅絕","臺灣和澳洲連在一起"],a:0,e:"陸橋讓大陸的動植物遷移到臺灣。海平面上升後被隔離，部分生物演化成臺灣特有種。"},
-  {s:"從臺灣搭飛機到東京、上海、香港、馬尼拉，大約都在 4 小時以內。這說明臺灣適合發展成什麼？",o:["畜牧業中心","東亞海空運的轉運樞紐","沙漠觀光地","南極研究站"],a:1,e:"臺灣位在東亞島弧的中間，到周邊大城市都很近，適合當海空運的轉運樞紐。"}
+  {story:"<b>題組四</b>　小安查了航班資訊，發現從臺灣搭飛機到東京、上海、香港、馬尼拉，大約都在 4 小時以內。",s:"這說明臺灣適合發展成什麼？",o:["畜牧業中心","東亞海空運的轉運樞紐","沙漠觀光地","南極研究站"],a:1,e:"臺灣位在東亞島弧的中間，到周邊大城市都很近，適合當海空運的轉運樞紐。"}
  ]}
+]}
 ];
 
 (function(){
-  const box=$("#sections");let n=0;const flat=[];
-  SECTIONS.forEach((sec,si)=>{
-    const s=document.createElement("div");s.className="sec";
-    s.innerHTML=`<div class="sec-h">${sec.title}<small>${sec.note}</small><span class="sub-score" id="ss${si}"></span></div>`;
-    sec.qs.forEach(q=>{
-      n++;const id="q"+n;q.n=n;q.pts=sec.pts;q.sec=si;flat.push(q);
-      if(q.story){const st=document.createElement("div");st.className="story";st.innerHTML=q.story;s.appendChild(st);}
-      const d=document.createElement("div");d.className="q";d.id="wrap-"+id;
-      const long=q.o.some(o=>o.length>12);
-      d.innerHTML=`<span class="qn">${n}.</span><p class="qs">${q.s}</p>${q.fig?`<div class="qfig">${q.fig}</div>`:""}<div class="opts${long?"":" two"}">${q.o.map((o,i)=>`<label class="opt" id="${id}-o${i}"><input type="radio" name="${id}" value="${i}"><span class="l">(${"ABCD"[i]})</span><span>${o}</span></label>`).join("")}</div>`;
-      s.appendChild(d);
+  const host=$("#papers");
+  const switchBtns=[...document.querySelectorAll(".psw")];
+  function pick(id){switchBtns.forEach(b=>b.setAttribute("aria-selected",b.dataset.paper===id));host.querySelectorAll(".paper").forEach(p=>p.hidden=p.dataset.paper!==id);store.set("geo7-exam-cur",id);}
+  switchBtns.forEach(b=>b.addEventListener("click",()=>pick(b.dataset.paper)));
+
+  EXAMS.forEach(EX=>{
+    const P=EX.id;const key="geo7-exam-"+P;
+    const total=EX.sections.reduce((t,s)=>t+s.qs.length,0);
+    let seed=P==="p1"?7:13;const rnd=()=>(seed=(seed*9301+49297)%233280)/233280;
+    const seq=[];for(let i=0;i<total;i++)seq.push(i%4);
+    for(let i=seq.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[seq[i],seq[j]]=[seq[j],seq[i]];}
+    let qi=0;EX.sections.forEach(s=>s.qs.forEach(q=>{const t=seq[qi++];if(q.fig||t===q.a)return;const o=q.o.slice();[o[q.a],o[t]]=[o[t],o[q.a]];q.o=o;q.a=t;}));
+    const form=document.createElement("form");form.className="paper";form.noValidate=true;form.dataset.paper=P;form.id="paper-"+P;
+    form.innerHTML=`<div class="score" hidden></div>
+      <div class="ex-head">
+        <h2>國一地理　${EX.title}　單元測驗</h2>
+        <div class="sub">${EX.range}　·　共 ${total} 題　·　作答時間 30 分鐘</div>
+        <div class="ex-meta">
+          <label for="${P}-name">姓名<input id="${P}-name" type="text" autocomplete="off"></label>
+          <label for="${P}-date">日期<input id="${P}-date" type="text" autocomplete="off"></label>
+          <span>滿分 100 分</span>
+        </div>
+      </div>
+      <div class="secs"></div>
+      <div class="ex-foot">
+        <button type="submit" class="btn ex-submit">交卷</button>
+        <button type="button" class="btn ghost ex-retry" hidden>重新作答</button>
+        <label class="ex-only-wrap" hidden style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" class="ex-only" id="${P}-only">只看錯題</label>
+        <span class="ex-msg" role="status"></span>
+      </div>`;
+    host.appendChild(form);
+    const q$=s=>form.querySelector(s);
+    const box=q$(".secs");let n=0;const flat=[];
+    EX.sections.forEach((sec,si)=>{
+      const s=document.createElement("div");s.className="sec";
+      s.innerHTML=`<div class="sec-h">${sec.title}<small>${sec.note}</small><span class="sub-score" data-ss="${si}"></span></div>`;
+      sec.qs.forEach(q=>{
+        n++;const id=P+"q"+n;q.n=n;q.id=id;q.pts=sec.pts;q.sec=si;flat.push(q);
+        if(q.story){const st=document.createElement("div");st.className="story";st.innerHTML=q.story;s.appendChild(st);}
+        const d=document.createElement("div");d.className="q";d.id="wrap-"+id;
+        const long=q.o.some(o=>o.length>12);
+        d.innerHTML=`<span class="qn">${n}.</span><p class="qs">${q.s}</p>${q.fig?`<div class="qfig">${q.fig}</div>`:""}<div class="opts${long?"":" two"}">${q.o.map((o,i)=>`<label class="opt" id="${id}-o${i}"><input type="radio" name="${id}" value="${i}"><span class="l">(${"ABCD"[i]})</span><span>${o}</span></label>`).join("")}</div>`;
+        s.appendChild(d);
+      });
+      box.appendChild(s);
     });
-    box.appendChild(s);
-  });
-  const form=$("#paper");let warned=false;
-  const saved=store.get("geo7-exam")||{};
-  if(saved.name)$("#ex-name").value=saved.name;
-  $("#ex-date").value=saved.date||new Date().toLocaleDateString("zh-TW");
-  if(saved.ans)Object.entries(saved.ans).forEach(([k,v])=>{const r=form.querySelector(`input[name="${k}"][value="${v}"]`);if(r)r.checked=true;});
-  function answers(){const a={};flat.forEach(q=>{const r=form.querySelector(`input[name="q${q.n}"]:checked`);if(r)a["q"+q.n]=+r.value;});return a;}
-  function save(g){store.set("geo7-exam",{name:$("#ex-name").value,date:$("#ex-date").value,ans:answers(),graded:!!g});}
-  form.addEventListener("change",e=>{warned=false;$("#ex-msg").textContent="";if(!form.classList.contains("graded"))save();});
-  $("#ex-name").addEventListener("input",()=>save(form.classList.contains("graded")));
-  function grade(quiet){
-    const a=answers();let total=0;const sub=[0,0,0],wrongList=[];
-    flat.forEach(q=>{
-      const w=$("#wrap-q"+q.n);const got=a["q"+q.n];const ok=got===q.a;
-      if(ok){total+=q.pts;sub[q.sec]+=q.pts;}else wrongList.push(q.n);
-      w.classList.toggle("is-right",ok);
-      $(`#q${q.n}-o${q.a}`).classList.add("right");
-      if(got!=null&&!ok)$(`#q${q.n}-o${got}`).classList.add("picked-wrong");
-      const m=document.createElement("span");m.className="mark-r";m.textContent=ok?"○":"✕";w.appendChild(m);
-      const ex=document.createElement("div");ex.className="exp";ex.innerHTML=`<b>正解 (${"ABCD"[q.a]})</b>　${q.e}`;w.appendChild(ex);
+    let warned=false;
+    const saved=store.get(key)||{};
+    const nameEl=q$("#"+P+"-name"),dateEl=q$("#"+P+"-date");
+    if(saved.name)nameEl.value=saved.name;
+    dateEl.value=saved.date||new Date().toLocaleDateString("zh-TW");
+    if(saved.ans)Object.entries(saved.ans).forEach(([k,v])=>{const r=form.querySelector(`input[name="${k}"][value="${v}"]`);if(r)r.checked=true;});
+    function answers(){const a={};flat.forEach(q=>{const r=form.querySelector(`input[name="${q.id}"]:checked`);if(r)a[q.id]=+r.value;});return a;}
+    function save(g){store.set(key,{name:nameEl.value,date:dateEl.value,ans:answers(),graded:!!g});}
+    const msg=q$(".ex-msg"),sc=q$(".score");
+    form.addEventListener("change",e=>{if(e.target.classList.contains("ex-only"))return;warned=false;msg.textContent="";if(!form.classList.contains("graded"))save();});
+    nameEl.addEventListener("input",()=>save(form.classList.contains("graded")));
+    function grade(quiet){
+      const a=answers();let tot=0;const sub=EX.sections.map(()=>0),wrongList=[];
+      flat.forEach(q=>{
+        const w=q$("#wrap-"+q.id);const got=a[q.id];const ok=got===q.a;
+        if(ok){tot+=q.pts;sub[q.sec]+=q.pts;}else wrongList.push(q.n);
+        w.classList.toggle("is-right",ok);
+        q$(`#${q.id}-o${q.a}`).classList.add("right");
+        if(got!=null&&!ok)q$(`#${q.id}-o${got}`).classList.add("picked-wrong");
+        const m=document.createElement("span");m.className="mark-r";m.textContent=ok?"○":"✕";w.appendChild(m);
+        const ex=document.createElement("div");ex.className="exp";ex.innerHTML=`<b>正解 (${"ABCD"[q.a]})</b>　${q.e}`;w.appendChild(ex);
+      });
+      form.querySelectorAll("input[type=radio]").forEach(r=>r.disabled=true);
+      form.classList.add("graded");
+      EX.sections.forEach((s,i)=>q$(`[data-ss="${i}"]`).textContent=`得 ${sub[i]} / ${s.qs.length*s.pts} 分`);
+      sc.hidden=false;sc.innerHTML=`<div>${tot}<small>分</small></div>`;
+      q$(".ex-submit").hidden=true;q$(".ex-retry").hidden=false;q$(".ex-only-wrap").hidden=false;
+      const word=tot>=90?"非常棒！觀念很清楚。":tot>=70?"不錯喔！看一下錯的題目和解析。":tot>=50?"有基礎了，回講義複習錯題的單元再試一次。":"先回去看講義和均一影片，再用互動練習熟悉一下。";
+      msg.innerHTML=`<span class="result">${tot} 分　${word}</span>${wrongList.length?`<br>錯的題目：第 ${wrongList.join("、")} 題`:""}`;
+      save(true);
+      if(!quiet)sc.scrollIntoView({behavior:"smooth",block:"center"});
+    }
+    form.addEventListener("submit",e=>{
+      e.preventDefault();
+      const a=answers();const blank=flat.filter(q=>a[q.id]==null).map(q=>q.n);
+      if(blank.length&&!warned){warned=true;msg.textContent=`還有 ${blank.length} 題沒作答（第 ${blank.join("、")} 題）。再按一次「交卷」就直接批改。`;return;}
+      grade();
     });
-    form.querySelectorAll("input[type=radio]").forEach(r=>r.disabled=true);
-    form.classList.add("graded");
-    SECTIONS.forEach((s,i)=>$("#ss"+i).textContent=`得 ${sub[i]} / ${s.qs.length*s.pts} 分`);
-    const sc=$("#score");sc.hidden=false;sc.innerHTML=`<div>${total}<small>分</small></div>`;
-    $("#ex-submit").hidden=true;$("#ex-retry").hidden=false;$("#ex-only-wrap").hidden=false;
-    let word=total>=90?"非常棒！觀念很清楚。":total>=70?"不錯喔！看一下錯的題目和解析。":total>=50?"有基礎了，回講義複習錯題的單元再試一次。":"先回去看講義和均一影片，再用互動練習熟悉一下。";
-    $("#ex-msg").innerHTML=`<span class="result">${total} 分　${word}</span>${wrongList.length?`<br>錯的題目：第 ${wrongList.join("、")} 題`:""}`;
-    save(true);
-    if(!quiet)sc.scrollIntoView({behavior:"smooth",block:"center"});
-  }
-  form.addEventListener("submit",e=>{
-    e.preventDefault();
-    const a=answers();const blank=flat.filter(q=>a["q"+q.n]==null).map(q=>q.n);
-    if(blank.length&&!warned){warned=true;$("#ex-msg").textContent=`還有 ${blank.length} 題沒作答（第 ${blank.join("、")} 題）。再按一次「交卷」就直接批改。`;return;}
-    grade();
+    q$(".ex-retry").addEventListener("click",()=>{
+      form.classList.remove("graded","hide-right");q$(".ex-only").checked=false;
+      form.querySelectorAll(".mark-r,.exp").forEach(x=>x.remove());
+      form.querySelectorAll(".opt").forEach(o=>o.classList.remove("right","picked-wrong"));
+      form.querySelectorAll(".q").forEach(q=>q.classList.remove("is-right"));
+      form.querySelectorAll("input[type=radio]").forEach(r=>{r.disabled=false;r.checked=false;});
+      form.querySelectorAll("[data-ss]").forEach(x=>x.textContent="");
+      sc.hidden=true;q$(".ex-submit").hidden=false;q$(".ex-retry").hidden=true;q$(".ex-only-wrap").hidden=true;msg.textContent="";warned=false;save(false);
+      form.scrollIntoView({behavior:"smooth"});
+    });
+    q$(".ex-only").addEventListener("change",e=>form.classList.toggle("hide-right",e.target.checked));
+    if(saved.graded&&saved.ans&&Object.keys(saved.ans).length)grade(true);
   });
-  $("#ex-retry").addEventListener("click",()=>{
-    form.classList.remove("graded","hide-right");$("#ex-only").checked=false;
-    form.querySelectorAll(".mark-r,.exp").forEach(x=>x.remove());
-    form.querySelectorAll(".opt").forEach(o=>o.classList.remove("right","picked-wrong"));
-    form.querySelectorAll(".q").forEach(q=>q.classList.remove("is-right"));
-    form.querySelectorAll("input[type=radio]").forEach(r=>{r.disabled=false;r.checked=false;});
-    SECTIONS.forEach((s,i)=>$("#ss"+i).textContent="");
-    $("#score").hidden=true;$("#ex-submit").hidden=false;$("#ex-retry").hidden=true;$("#ex-only-wrap").hidden=true;$("#ex-msg").textContent="";warned=false;save(false);
-    form.scrollIntoView({behavior:"smooth"});
-  });
-  $("#ex-only").addEventListener("change",e=>form.classList.toggle("hide-right",e.target.checked));
-  if(saved.graded&&saved.ans&&Object.keys(saved.ans).length)grade(true);
+  pick(store.get("geo7-exam-cur")==="p2"?"p2":"p1");
 })();
 })();
 </script>
